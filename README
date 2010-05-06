@@ -1,0 +1,34 @@
+// Fake Nagios Plugin (check_fake_contacts) v0.5
+// (requires php5-cli)
+// reads out values of ini file to create fake monitoring setups
+// example: check_fake_contacts -F /data/test.ini -S test
+// example ini file: test.ini
+/*
+[test]
+name = WALRUS
+val = 190
+unit = Wa
+warn = 200
+crit = 300
+high = 350
+*/
+// example output: OK - WALRUS is 190 Wa|'WALRUS'=190;200;0;350
+// New in V0.4:
+// * check if ini file exists
+// * Randon values
+// ** To enable random values, set val in the ini file like this for example:
+// ** val = "190~210"
+// ** php will generate a random number between these two values. Neat is't it?
+//
+// New in V0.5
+// * Default values
+// if the special section 'defaults' exists in the ini file
+// all the given values in this section will be used as defaults
+// for all other sections
+// * Low value
+// You can now define the low value of the preformance
+//
+// author: subutux-AT-gmail.com
+// license : GLPv2
+///////////////////////////////////////////////////////////////////////////////
+
