@@ -1,0 +1,107 @@
+#!/usr/bin/php
+<?
+// Fake Nagios Plugin (check_fake_contacts) v0.4
+// reads out values of ini file to create fake monitoring setups
+// example: check_fake_contacts -F /data/test.ini -S test
+// example ini file: test.ini
+/*
+[test]
+name = WALRUS
+val = 190
+unit = Wa
+warn = 200
+crit = 300
+high = 350
+*/
+// example output: OK - WALRUS is 190 Wa|'WALRUS'=190;200;0;350
+// New in V0.4:
+// * check if ini file exists
+// * Randon values
+// ** To enable random values, set val in the ini file like this for example:
+// ** val = "190~210"
+// ** php will generate a random number between these two values. Neat is't it?
+//
+// New in V0.5
+// * Default values
+// if the special section 'defaults' exists in the ini file
+// all the given values in this section will be used as defaults
+// for all other sections
+// * Low value
+// You can now define the low value of the preformance
+//
+// author: subutux-AT-gmail.com
+// license : GLPv2
+///////////////////////////////////////////////////////////////////////////////
+
+$OUT['OK']['exit'] = 0;
+$OUT['OK']['text'] = "OK";
+$OUT['UN']['exit'] = 3;
+$OUT['UN']['text'] = "UNKNOWN";
+$OUT['WA']['exit'] = 1;
+$OUT['WA']['text'] = "WARNING";
+$OUT['CR']['exit'] = 2;
+$OUT['CR']['text'] = "CRITICAL";
+$opts = getopt("F:S:");
+//if (isset($opts['H'])){ $host = $option['H'];}else{print "error: No host specified!\n";exit(3); }
+if (isset($opts['F'])){ $ini = $opts['F'];}else{print "error: No Info file specified!\n";exit(3); }
+if (isset($opts['S'])){ $S = $opts['S'];}else{print "error: No section specified!\n";exit(3); }
+if (!preg_match('/\//',$ini)){
+	print "error: path to info file is not relative!";
+	exit(3);
+}
+if (file_exists($ini)){
+	$data = parse_ini_file($ini,true);
+} else {
+	print "error: ini file does not exist!";
+	exit(3);
+}
+if (!array_key_exists($S,$data)){
+        print "error: given section does not exist in ini file!";
+        exit(3);
+}
+$critical	= $data[$S]['crit'];
+$warn		= $data[$S]['warn'];
+$high		= $data[$S]['high'];
+$low		= $data[$S]['low'];
+$value		= $data[$S]['val'];
+$unit		= $data[$S]['unit'];
+$name		= $data[$S]['name'];
+if (substr_count($value,'~') == true){
+	$val_tmp = explode('~',$value);
+	$value   = rand($val_tmp[0],$val_tmp[1]);
+}
+if (array_key_exists('defaults',$data)){
+	if (array_key_exists('crit',$data['defaults']) && !array_key_exists('crit',$data[$S])){
+		$critical	= $data['defaults']['crit'];
+	}
+	if (array_key_exists('warn',$data['defaults']) && !array_key_exists('warn',$data[$S])){
+                $warn		= $data['defaults']['warn'];
+        }
+	if (array_key_exists('high',$data['defaults']) && !array_key_exists('high',$data[$S])){
+                $high		= $data['defaults']['high'];
+        }
+	if (array_key_exists('low',$data['defaults']) && !array_key_exists('low',$data[$S])){
+                $low		= $data['defaults']['low'];
+        }
+	if (array_key_exists('val',$data['defaults']) && !array_key_exists('val',$data[$S])){
+                $value		= $data['defaults']['val'];
+        }
+	if (array_key_exists('name',$data['defaults']) && !array_key_exists('name',$data[$S])){
+                $name		= $data['defaults']['name'];
+        }
+	if (array_key_exists('unit',$data['defaults']) && !array_key_exists('unit',$data[$S])){
+                $unit		= $data['defaults']['unit'];
+        }
+}
+$pref           = "'$name'=$value;$warn;$critical;$low;$high";
+if ($critical < $warn){print "error: warning must be < critical!";exit(3);}
+if ($value < $warn){
+	$status = "OK";
+} else if ($value > $warn ){
+	if ($value < $critical){
+		$status = "WA";
+	} else  $status = "CR";
+}
+$summ		= $OUT[$status]['text']." - $name is $value $unit";
+print $summ."|".$pref."\n";
+exit($OUT[$status]['exit']);
