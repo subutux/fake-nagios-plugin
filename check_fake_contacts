@@ -1,5 +1,5 @@
 #!/usr/bin/php
-<?
+<?php
 // Fake Nagios Plugin (check_fake_contacts) v0.4
 // reads out values of ini file to create fake monitoring setups
 // example: check_fake_contacts -F /data/test.ini -S test
@@ -32,7 +32,7 @@ high = 350
 // author: subutux-AT-gmail.com
 // license : GLPv2
 ///////////////////////////////////////////////////////////////////////////////
-
+//error_reporting(0);
 $OUT['OK']['exit'] = 0;
 $OUT['OK']['text'] = "OK";
 $OUT['UN']['exit'] = 3;
@@ -59,13 +59,13 @@ if (!array_key_exists($S,$data)){
         print "error: given section does not exist in ini file!";
         exit(3);
 }
-$critical	= $data[$S]['crit'];
-$warn		= $data[$S]['warn'];
-$high		= $data[$S]['high'];
-$low		= $data[$S]['low'];
-$value		= $data[$S]['val'];
-$unit		= $data[$S]['unit'];
-$name		= $data[$S]['name'];
+$critical	= (array_key_exists('crit',$data[$S])) ? $data[$S]['crit'] : 0;
+$warn		= (array_key_exists('warn',$data[$S])) ? $data[$S]['warn'] : 0;
+$high		= (array_key_exists('high',$data[$S])) ? $data[$S]['high'] : 0;
+$low		= (array_key_exists('low',$data[$S])) ? $data[$S]['low'] : 0;
+$value		= (array_key_exists('val',$data[$S])) ? $data[$S]['val'] : O;
+$unit		= (array_key_exists('unit',$data[$S])) ? $data[$S]['unit'] : 0;
+$name		= (array_key_exists('name',$data[$S])) ? $data[$S]['name'] : 0;
 if (substr_count($value,'~') == true){
 	$val_tmp = explode('~',$value);
 	$value   = rand($val_tmp[0],$val_tmp[1]);
