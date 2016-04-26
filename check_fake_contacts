@@ -63,7 +63,7 @@ $critical	= (array_key_exists('crit',$data[$S])) ? $data[$S]['crit'] : 0;
 $warn		= (array_key_exists('warn',$data[$S])) ? $data[$S]['warn'] : 0;
 $high		= (array_key_exists('high',$data[$S])) ? $data[$S]['high'] : 0;
 $low		= (array_key_exists('low',$data[$S])) ? $data[$S]['low'] : 0;
-$value		= (array_key_exists('val',$data[$S])) ? $data[$S]['val'] : O;
+$value		= (array_key_exists('val',$data[$S])) ? $data[$S]['val'] : 0;
 $unit		= (array_key_exists('unit',$data[$S])) ? $data[$S]['unit'] : 0;
 $name		= (array_key_exists('name',$data[$S])) ? $data[$S]['name'] : 0;
 if (substr_count($value,'~') == true){
